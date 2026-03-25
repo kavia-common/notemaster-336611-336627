@@ -133,6 +133,19 @@ EOF
 echo "psql postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}" > db_connection.txt
 echo "Connection string saved to db_connection.txt"
 
+# Initialize notes app schema + seed data (idempotent)
+if [ -f "./init_notes_schema.sh" ]; then
+    echo ""
+    echo "Initializing notes schema/seed..."
+    chmod +x ./init_notes_schema.sh 2>/dev/null || true
+    ./init_notes_schema.sh || {
+        echo "⚠ Notes schema initialization failed"
+        exit 1
+    }
+else
+    echo "⚠ init_notes_schema.sh not found; skipping notes schema initialization"
+fi
+
 # Save environment variables to a file
 cat > db_visualizer/postgres.env << EOF
 export POSTGRES_URL="postgresql://localhost:${DB_PORT}/${DB_NAME}"
